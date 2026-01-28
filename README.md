@@ -274,3 +274,7 @@ python pipeline.py optuna --model Pythia-410m --methods gin mlp weighted --submi
 python pipeline.py train --model Pythia-410m --submit
 python pipeline.py eval --model Pythia-410m --submit
 ```
+
+## Acknowledgments
+
+The single-layer baseline evaluation code (`MTEB-Harness.py`) was adapted from [OFSkean/information_flow](https://github.com/OFSkean/information_flow).

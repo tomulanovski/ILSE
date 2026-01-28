@@ -1,3 +1,9 @@
+"""
+MTEB evaluation harness for single-layer baselines.
+
+This code was adapted from:
+https://github.com/OFSkean/information_flow
+"""
 import argparse
 import os
 from itertools import product
