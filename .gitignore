@@ -1,0 +1,52 @@
+# hide folders and symlinks
+src/
+lcc_logs/*
+datasets/*
+model_checkpoints/*
+experiments/large_results/*
+embeddings/*
+embeddings
+experiments/checkpoints/*
+checkpoints/*
+logs/*
+
+# hide particular files
+*.png
+*.pyc
+error_logs.txt
+*.ckpt
+*.log
+
+# hide user configuration (contains credentials)
+.env
+
+#hide all hidden
+.*/
+
+
+#ignore results
+mteb_*/
+job_logs/
+summary/
+results/
+
+# Ignore large generated files and directories
+precomputed_embeddings/
+saved_models/
+*.pt
+*.h5
+*.hdf5
+
+# Ignore generated job scripts (can be regenerated)
+scripts_and_jobs/slurm_jobs/generated_jobs/*/
+
+# Ignore markdown files except README
+*.md
+!README.md
+
+
+# hide papermill notebooks
+experiments/output*.ipynb
+scripts/imagenet/make_embeddings.py
+
+!.git/

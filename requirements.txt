@@ -1,0 +1,36 @@
+# Core dependencies for ILSE
+# Install with: pip install -r requirements.txt
+
+# Deep Learning
+torch>=2.0.0
+torch-geometric>=2.3.0
+transformers>=4.30.0
+accelerate>=0.20.0
+
+# Evaluation and Benchmarking
+mteb>=1.0.0
+datasets>=2.0.0
+
+# Hyperparameter Optimization
+optuna>=3.0.0
+psycopg2-binary>=2.9.0  # PostgreSQL adapter for Optuna
+
+# Scientific Computing
+numpy>=1.23.0
+scipy>=1.10.0
+scikit-learn>=1.2.0
+pandas>=1.5.0
+
+# Data Storage
+h5py>=3.8.0
+
+# Utilities
+python-dotenv>=1.0.0
+tqdm>=4.64.0
+matplotlib>=3.7.0
+
+# LLM2Vec (for some model types)
+llm2vec>=0.1.0
+
+# Optional: For specific model types
+# flash-attn  # Uncomment if using models that require flash attention
