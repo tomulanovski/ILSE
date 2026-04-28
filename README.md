@@ -219,12 +219,11 @@ pipeline.py                                # SLURM workflow
 ## Citation
 
 ```bibtex
-@misc{ulanovski2026ilse,
-  title         = {Improving {LLM} Predictions via Inter-Layer Structural Encoders},
-  author        = {Ulanovski, Tom and Blyachman, Eyal and Bechler-Speicher, Maya},
-  year          = {2026},
-  eprint        = {2603.22665},
-  archivePrefix = {arXiv}
+@article{ulanovski2026improving,
+  title={Improving LLM Predictions via Inter-Layer Structural Encoders},
+  author={Ulanovski, Tom and Blyachman, Eyal and Bechler-Speicher, Maya},
+  journal={arXiv preprint arXiv:2603.22665},
+  year={2026}
 }
 ```
 
