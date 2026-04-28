@@ -3,8 +3,9 @@
 Code for *Improving LLM Predictions via Inter-Layer Structural Encoders*
 (Ulanovski, Blyachman, Bechler-Speicher).
 
-- Preprint: arXiv:XXXX.XXXXX
-- Short version: GRaM Tiny Papers Workshop @ ICLR 2026
+[![arXiv](https://img.shields.io/badge/arXiv-XXXX.XXXXX-b31b1b.svg)](https://arxiv.org/abs/XXXX.XXXXX)
+
+A short version appeared at the GRaM Tiny Papers Workshop, ICLR 2026.
 
 ILSE aggregates representations from all layers of a frozen LLM into a single downstream
 representation by treating each layer's pooled hidden state as a node in a small graph and
@@ -14,12 +15,17 @@ learning a fusion encoder over those nodes.
 
 Three layer-aggregation encoders are implemented:
 
-- **Cayley-Encoder** — GIN/GCN over a Cayley graph of `SL(2, Z_n)`, padded with virtual nodes when the graph is larger than the layer count.
+- **Cayley-Encoder** — GIN (Xu et al., 2019) / GCN (Kipf & Welling, 2017) over a Cayley graph of `SL(2, Z_n)`, padded with virtual nodes following Wilson et al. (2025) when the graph is larger than the layer count.
 - **FC-Encoder** — GIN/GCN over a fully-connected layer graph.
-- **Set-Encoder** — DeepSet over the layer representations.
+- **Set-Encoder** — DeepSet (Zaheer et al., 2017) over the layer representations.
 
-Baselines: Last-Layer, Best-Layer, MLP (last / best layer), Weighted (ELMo-style),
-DWAtt with a 256-dim input projection, and LoRA fine-tuning.
+Baselines:
+
+- **Last-Layer** / **Best-Layer** — raw layer embeddings, no training (Skean et al., 2025).
+- **MLP** — MLP probe over the last layer or the best single layer.
+- **Weighted** — learned scalar layer weighting, ELMo-style (Peters et al., 2018).
+- **DWAtt** — Depth-Wise Attention (ElNokrashy et al., 2024), with a 256-dim input projection.
+- **LoRA** — low-rank adapter fine-tuning of the base LLM (Hu et al., 2022).
 
 ## Installation
 
