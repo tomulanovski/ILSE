@@ -1,7 +1,9 @@
 # ILSE: Inter-Layer Structural Encoders
 
 Code for *Improving LLM Predictions via Inter-Layer Structural Encoders*
-(Ulanovski, Blyachman, Bechler-Speicher).
+(Ulanovski\*, Blyachman\*, Bechler-Speicher).
+
+\*Equal contribution; author listing order is random and may differ between versions.
 
 [![arXiv](https://img.shields.io/badge/arXiv-2603.22665-b31b1b.svg)](https://arxiv.org/abs/2603.22665)
 
