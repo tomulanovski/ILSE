@@ -3,7 +3,7 @@
 Code for *Improving LLM Predictions via Inter-Layer Structural Encoders*
 (Ulanovski, Blyachman, Bechler-Speicher).
 
-[![arXiv](https://img.shields.io/badge/arXiv-XXXX.XXXXX-b31b1b.svg)](https://arxiv.org/abs/XXXX.XXXXX)
+[![arXiv](https://img.shields.io/badge/arXiv-2603.22665-b31b1b.svg)](https://arxiv.org/abs/2603.22665)
 
 A short version appeared at the GRaM Tiny Papers Workshop, ICLR 2026.
 
@@ -221,7 +221,7 @@ pipeline.py                                # SLURM workflow
   title         = {Improving {LLM} Predictions via Inter-Layer Structural Encoders},
   author        = {Ulanovski, Tom and Blyachman, Eyal and Bechler-Speicher, Maya},
   year          = {2026},
-  eprint        = {XXXX.XXXXX},
+  eprint        = {2603.22665},
   archivePrefix = {arXiv}
 }
 ```
