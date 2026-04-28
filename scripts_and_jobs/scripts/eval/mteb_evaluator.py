@@ -22,6 +22,7 @@ from scripts_and_jobs.scripts.eval.mlp_wrapper import MLPWrapper
 from scripts_and_jobs.scripts.eval.weighted_wrapper import WeightedWrapper
 from scripts_and_jobs.scripts.eval.deepset_wrapper import DeepSetWrapper
 from scripts_and_jobs.scripts.eval.dwatt_wrapper import DWAttWrapper
+from scripts_and_jobs.scripts.eval.lora_wrapper import LoRAWrapper
 from scripts_and_jobs.scripts.eval.custom_task_evaluator import evaluate_custom_tasks
 
 
@@ -36,7 +37,7 @@ def main():
     parser.add_argument("--model_path", type=str, required=True,
                        help="Path to trained model checkpoint (GNN or MLP)")
     parser.add_argument("--model_type", type=str, default="auto",
-                       choices=["gin", "gcn", "mlp", "weighted", "deepset", "dwatt", "auto"],
+                       choices=["gin", "gcn", "mlp", "weighted", "deepset", "dwatt", "lora", "auto"],
                        help="Model type (auto-detects from filename if not specified)")
     
     # MTEB evaluation
@@ -71,9 +72,11 @@ def main():
             args.model_type = "weighted"
         elif filename.startswith("deepset_") or "_deepset" in filename:
             args.model_type = "deepset"
+        elif filename.startswith("lora_") or "_lora" in filename:
+            args.model_type = "lora"
         else:
             print(f"Error: Cannot auto-detect model type from {args.model_path}")
-            print("Please specify --model_type gin, --model_type gcn, --model_type mlp, --model_type weighted, --model_type deepset, or --model_type dwatt")
+            print("Please specify --model_type gin, --model_type gcn, --model_type mlp, --model_type weighted, --model_type deepset, --model_type dwatt, or --model_type lora")
             return
     
     # Validate model path
@@ -156,6 +159,17 @@ def main():
 
             model.load_model(args.model_path)
             print("✓ DWAtt encoder loaded successfully")
+
+        elif args.model_type == "lora":
+            # Use LoRA wrapper - PEFT-finetuned base model baseline
+            model = LoRAWrapper(
+                model_specs=model_specs,
+                device_map=args.device_map,
+                model_path=args.model_path
+            )
+
+            model.load_model(args.model_path)
+            print("✓ LoRA adapter loaded successfully")
 
     except Exception as e:
         print(f"✗ Error initializing model: {e}")

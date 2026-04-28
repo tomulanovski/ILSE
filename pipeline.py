@@ -1756,98 +1756,57 @@ def run_latex_table(input_files, output, model_names=None, task_col="Task",
 
 def main():
     parser = argparse.ArgumentParser(
-        description="ILSE Pipeline: Unified workflow orchestration (ALL MODELS USE PRECOMPUTED EMBEDDINGS)",
+        description="ILSE Pipeline: SLURM workflow orchestration over precomputed embeddings",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples (Classification):
-    # Start PostgreSQL database (one-time setup or restart)
+    # One-time: start a local PostgreSQL backend for Optuna
     python3 pipeline.py postgres
 
-    # Complete workflow for Pythia-410m
+    # End-to-end workflow for Pythia-410m
     python3 pipeline.py precompute --model Pythia-410m --submit
-    python3 pipeline.py optuna --model Pythia-410m --methods gin mlp weighted --submit
-    python3 pipeline.py train --model Pythia-410m --submit
-    python3 pipeline.py eval --model Pythia-410m --submit
-    python3 pipeline.py summarize --output pythia410m_results.csv --filter-model Pythia_410m
+    python3 pipeline.py optuna     --model Pythia-410m --methods gin mlp weighted deepset --submit
+    python3 pipeline.py train      --model Pythia-410m --submit
+    python3 pipeline.py eval       --model Pythia-410m --submit
+    python3 pipeline.py summarize  --filter-model Pythia_410m --output pythia410m_results.csv
 
-    # Run specific method only
-    python3 pipeline.py optuna --model Pythia-410m --methods gin
-    python3 pipeline.py train --model Pythia-410m --filter-study gin
-
-    # Run with cayley graph type (for Pythia-410m only)
+    # Restrict to a single method or graph topology
     python3 pipeline.py optuna --model Pythia-410m --methods gin --graph_type cayley --submit
-    python3 pipeline.py train --model Pythia-410m --graph_type cayley --submit
-    python3 pipeline.py eval --model Pythia-410m --submit
+    python3 pipeline.py train  --model Pythia-410m --graph_type cayley --submit
 
-    # Use precomputed embeddings for faster evaluation (MTEB-style, no LLM loading)
+    # Use precomputed embeddings at eval time too (no LLM loading)
     python3 pipeline.py eval --model Pythia-410m --use-precomputed --submit
 
 Examples (STS - Semantic Textual Similarity):
-    # V1 workflow: Complete STS for Pythia-410m (uses all confirmed trainable tasks by default)
+    # End-to-end STS workflow (mirrors the classification commands)
     python3 pipeline.py sts-precompute --model Pythia-410m --submit
-    python3 pipeline.py sts-optuna --model Pythia-410m --methods gin mlp weighted --submit
-    python3 pipeline.py sts-train --model Pythia-410m --submit
-    python3 pipeline.py sts-eval --model Pythia-410m
+    python3 pipeline.py sts-optuna     --model Pythia-410m --methods gin mlp weighted --submit
+    python3 pipeline.py sts-train      --model Pythia-410m --submit
+    python3 pipeline.py sts-eval       --model Pythia-410m --submit
 
-    # V2 workflow: Enhanced GIN with pool_real_nodes_only=True, train_eps, sum pooling
-    python3 pipeline.py sts-precompute --model Pythia-410m --tasks STSBenchmark --submit
-    python3 pipeline.py sts-optuna --model Pythia-410m --methods gin --v2 --submit
-    python3 pipeline.py sts-train --model Pythia-410m --v2 --submit  # Train V2 models
-    python3 pipeline.py sts-eval --model Pythia-410m --submit        # Evaluate on all STS tasks
-
-    # Use specific STS tasks (V1 only, default: all confirmed trainable = STSBenchmark, STS12)
+    # Restrict to a specific STS task
     python3 pipeline.py sts-precompute --model Pythia-410m --tasks STSBenchmark
-    python3 pipeline.py sts-optuna --model Pythia-410m --tasks STSBenchmark --methods gin
+    python3 pipeline.py sts-optuna     --model Pythia-410m --tasks STSBenchmark --methods gin
 
-    # Query native Optuna results for larger models (default behavior)
-    python3 pipeline.py sts-train --model TinyLlama-1.1B --submit
-    python3 pipeline.py sts-train --model Llama3-8B --submit
+    # Larger models (Gemma2-2B, Llama3-8B) — query their own Optuna studies
+    python3 pipeline.py sts-train --model Gemma2-2B  --submit
+    python3 pipeline.py sts-train --model Llama3-8B  --submit
 
-    # Transfer learning (optional): Use Pythia-410m hyperparameters for larger models
-    python3 pipeline.py sts-train --model TinyLlama-1.1B --transfer-from Pythia-410m --submit
+    # Optional: transfer Pythia-410m hyperparameters to a larger model instead of re-tuning
     python3 pipeline.py sts-train --model Llama3-8B --transfer-from Pythia-410m --submit
 
-    # Evaluate on general partition (shared pool)
+    # Evaluate on a different SLURM partition
     python3 pipeline.py sts-eval --model Pythia-410m --partition general --submit
 
-    # Linear methods (V2): Use linear_gin, linear_mlp, linear_deepset for true linear models (no ReLU)
-    python3 pipeline.py sts-optuna --model Pythia-410m --methods linear_gin --submit
-    python3 pipeline.py sts-train --model Pythia-410m --filter-study linear_gin --submit
-    python3 pipeline.py sts-eval --model Pythia-410m --submit
-    python3 pipeline.py sts-summarize --model Pythia-410m --linear --output sts_linear.csv
+    # Result tables
+    python3 pipeline.py summarize     --filter-model Pythia_410m --output cls_results.csv
+    python3 pipeline.py sts-summarize --model Pythia-410m         --output sts_results.csv
 
-    # Summarize non-linear STS results (default behavior)
-    python3 pipeline.py sts-summarize --model Pythia-410m --output sts_nonlinear.csv
-
-Examples (Retrieval - MS MARCO training):
-    # Step 1: Precompute MS MARCO triplet embeddings (50K samples)
-    python3 pipeline.py retrieval-precompute --model Pythia-410m --submit
-
-    # Step 2: Generate and submit 9 training jobs (runs in parallel on SLURM)
-    python3 pipeline.py retrieval-train --model Pythia-410m --submit
-
-    # Step 3: Evaluate zero-shot on MTEB retrieval tasks
-    python3 pipeline.py retrieval-eval --model Pythia-410m --submit
-
-9 models trained (all run in parallel as separate SLURM jobs):
-    GIN variants (6 models):
-      - GCN + mean pooling (gin_mlp_layers=0)
-      - GIN-1 + mean pooling (gin_mlp_layers=1)
-      - GIN-2 + mean pooling (gin_mlp_layers=2)
-      - GCN + attention pooling
-      - GIN-1 + attention pooling
-      - GIN-2 + attention pooling
-    Baselines (3 models):
-      - DeepSet (pre=1, post=1, sum pooling)
-      - MLP (last layer, 2 layers)
-      - Weighted (learned layer weights)
-
-All models saved to: saved_models/retrieval/
-    retrieval_gcn_MSMARCO_Pythia_410m_cayley_mean.pt
-    retrieval_deepset_MSMARCO_Pythia_410m_pre1_post1_sum.pt
-    retrieval_mlp_MSMARCO_Pythia_410m_last_layers2.pt
-    retrieval_weighted_MSMARCO_Pythia_410m_softmax.pt
-    (+ 5 more GIN variants)
+Notes:
+    * `--graph_type cayley` automatically applies pool_real_nodes_only=True and
+      train_eps=True (matching the paper's setup).
+    * `linear_gin` / `linear_mlp` / `linear_deepset` methods drop ReLU activations
+      for true-linear-probe ablations.
         """
     )
 

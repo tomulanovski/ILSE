@@ -82,9 +82,14 @@ def train_and_eval_model_precomputed(args: argparse.Namespace) -> dict:
     val_layerwise = [np.array(val_emb[i], copy=True) for i in range(len(val_emb))]
 
     # Build model based on encoder type
+    # Cayley graphs always pool real nodes only and use trainable epsilon
+    cayley_defaults = (args.graph_type == "cayley")
+
     if args.encoder == "gin":
-        train_dataset = SingleGraphDataset(train_layerwise, train_labels.tolist(), args.graph_type)
-        val_dataset = SingleGraphDataset(val_layerwise, val_labels.tolist(), args.graph_type)
+        train_dataset = SingleGraphDataset(train_layerwise, train_labels.tolist(), args.graph_type,
+                                           keep_embedding_layer=cayley_defaults)
+        val_dataset = SingleGraphDataset(val_layerwise, val_labels.tolist(), args.graph_type,
+                                         keep_embedding_layer=cayley_defaults)
 
         train_loader = PyGDataLoader(train_dataset, batch_size=args.batch_size, shuffle=True)
         val_loader = PyGDataLoader(val_dataset, batch_size=args.batch_size, shuffle=False)
@@ -96,7 +101,9 @@ def train_and_eval_model_precomputed(args: argparse.Namespace) -> dict:
             dropout=args.dropout,
             gin_mlp_layers=args.gin_mlp_layers,
             node_to_choose=args.node_to_choose,
-            graph_type=args.graph_type
+            graph_type=args.graph_type,
+            pool_real_nodes_only=cayley_defaults,
+            train_eps=cayley_defaults,
         )
         model = SingleClassifier(gin_encoder, args.gin_hidden_dim, num_classes).to(device)
         train_mode = "gin"

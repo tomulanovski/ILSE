@@ -111,17 +111,22 @@ def train_and_eval_model(args):
     h5_path = Path(args.embeddings_dir) / f"{args.task}.h5"
     print(f"[DEBUG] Loading H5 file: {h5_path}")
 
+    # Cayley graphs always pool real nodes only and use trainable epsilon
+    cayley_defaults = (args.graph_type == "cayley")
+
     train_dataset = PrecomputedSTSGraphDataset(
         h5_path=str(h5_path),
         split="train",
-        graph_type=args.graph_type
+        graph_type=args.graph_type,
+        keep_embedding_layer=cayley_defaults,
     )
     print(f"[DEBUG] Train dataset loaded: {len(train_dataset)} samples")
 
     val_dataset = PrecomputedSTSGraphDataset(
         h5_path=str(h5_path),
         split="validation",
-        graph_type=args.graph_type
+        graph_type=args.graph_type,
+        keep_embedding_layer=cayley_defaults,
     )
     print(f"[DEBUG] Val dataset loaded: {len(val_dataset)} samples")
 
@@ -140,7 +145,9 @@ def train_and_eval_model(args):
         dropout=args.dropout,
         gin_mlp_layers=args.gin_mlp_layers,
         node_to_choose=args.node_to_choose,
-        graph_type=args.graph_type
+        graph_type=args.graph_type,
+        pool_real_nodes_only=cayley_defaults,
+        train_eps=cayley_defaults,
     )
     model = PairCosineSimScore(gin_encoder).to(device)
 

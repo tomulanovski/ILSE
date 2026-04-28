@@ -23,7 +23,8 @@ model_types = ["cerebras",
                 "LLM2Vec-mntp-unsup-simcse",
                 "LLM2Vec-mntp-supervised",
                 "LLM2Vec-mntp",
-                "llama-instruct"]
+                "llama-instruct",
+                "Gemma2"]
 
 cerebras_sizes = ['111M', '256M', '590M', '1.3B', '2.7B', '6.7B', '13B'] # '13b' also exists but doesnt fit in 24G for bfloat16
 Pythia_sizes = ['14m', '70m', '160m', '410m', '1b', '1.4b', '2.8b', '6.9b'] # '12b' also exists but doesnt fit in 24G for bfloat16
@@ -35,6 +36,7 @@ llama3_sizes = ['8B']
 tinyllama_sizes = ['1.1B']
 LLM2Vec_sizes = ['8B']
 llama_instruct_sizes = ['8B']
+Gemma2_sizes = ['2B']
 
 model_name_to_sizes = {
     'Pythia': Pythia_sizes,
@@ -50,6 +52,7 @@ model_name_to_sizes = {
     'llama-instruct': llama_instruct_sizes,
     'LLM2Vec-mntp-supervised': LLM2Vec_sizes,
     'LLM2Vec-mntp': LLM2Vec_sizes,
+    'Gemma2': Gemma2_sizes,
 }
 
 
@@ -94,6 +97,9 @@ def get_model_path(name, size):
     elif name == "llama-instruct":
         assert size in llama_instruct_sizes
         return f"meta-llama/Meta-Llama-3-8B-Instruct"
+    elif name == "Gemma2":
+        assert size in Gemma2_sizes
+        return "google/gemma-2-2b"
     else:
         raise ValueError(f"Model type {name} not found")
 
@@ -169,6 +175,9 @@ class TextLayerwiseAutoModelWrapper(BaseLayerwiseAutoModelWrapper):
             'torch_dtype': torch.bfloat16 if torch.cuda.is_bf16_supported() else torch.float16,
             'device_map': self.device_map
         }
+
+        if self.model_specs.model_family == "Gemma2":
+            FROM_PRETRAINED_KWARGS['attn_implementation'] = 'eager'
 
         if 'llm2vec' in self.model_path.lower():
             MODEL_CLASS = LLM2Vec
@@ -316,10 +325,10 @@ class TextLayerwiseAutoModelWrapper(BaseLayerwiseAutoModelWrapper):
         encodings = torch.cat(encoded_batches).squeeze()
         if len(encodings.shape) == 1:
             encodings = encodings.unsqueeze(0)
-        encodings = encodings.numpy()
+        encodings = encodings.float().numpy()
 
         if return_raw_hidden_states:
-            layerwise_encodings = torch.cat(layerwise_encoded_batches, dim=1).squeeze().numpy()
+            layerwise_encodings = torch.cat(layerwise_encoded_batches, dim=1).squeeze().float().numpy()
             # Final GPU cache clear after all processing
             if torch.cuda.is_available():
                 torch.cuda.empty_cache()
